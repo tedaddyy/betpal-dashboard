@@ -19,13 +19,15 @@ The backend changes are committed on `betpal-backend` (`missionControl.js`,
 `server.js`, `render.yaml`). They only ADD the `/api/dashboard/*` routes — your
 existing app endpoints are untouched.
 
-1. **Push the backend** (triggers a Render redeploy of betpal-backend):
-   ```bash
-   cd ~/Documents/betpal-backend
-   git push origin main
-   ```
+> **Order matters.** Set the env vars **before** you push. Your owner account is
+> seeded on the *first boot of the new code* using these vars — if you push first
+> with them unset, it seeds a random password (printed once in the logs) and
+> setting your password afterward won't take effect (the account already exists).
+> You never click "build" — Render auto-redeploys on both a save and a push.
 
-2. **Add the dashboard env vars** in Render → `betpal-backend` → **Environment**:
+1. **Add the dashboard env vars FIRST** in Render → `betpal-backend` →
+   **Environment** → **Save Changes** (this redeploys the *current* code, which
+   harmlessly ignores them):
 
    | Key | Value |
    |---|---|
@@ -36,15 +38,27 @@ existing app endpoints are untouched.
    | `DASHBOARD_AI_MODEL` | `claude-sonnet-4-6` (optional) |
 
    `ANTHROPIC_API_KEY` is already set (it powers the analyst) — the dashboard
-   reuses it for AI drafting. Save → Render redeploys.
+   reuses it for AI drafting.
 
-   > On first boot the backend creates your owner account from
-   > `DASHBOARD_OWNER_EMAIL` + `DASHBOARD_OWNER_PASSWORD`. If you skip the
-   > password, a temporary one is printed once in the Render logs.
+2. **Then push the backend** (Render auto-deploys the new code; on this boot the
+   vars are present, so your owner account is seeded with the email + password
+   you chose):
+   ```bash
+   cd ~/Documents/betpal-backend
+   git push origin main
+   ```
+   After ~1–2 min, check the deploy **Logs** for
+   `Mission Control dashboard routes mounted at /api/dashboard`. (If auto-deploy
+   is off, hit **Manual Deploy → Deploy latest commit**.)
 
 3. The dashboard's data (team accounts, todos, posts, ideas…) lives in
    `mission_control.db` on the **same persistent disk** as the app DB
    (`DATA_DIR=/data`), so it survives redeploys. No extra setup.
+
+   > Already pushed before setting the vars? No harm — the DB is empty. Just set
+   > the vars, then in the Render **Shell** run `rm /data/mission_control.db*` and
+   > redeploy; the owner re-seeds with your chosen credentials. (Or grab the temp
+   > password from the first deploy's logs and change it after logging in.)
 
 ---
 
