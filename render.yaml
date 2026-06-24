@@ -1,0 +1,22 @@
+# Render Blueprint for the BetPal Mission Control dashboard (Next.js frontend).
+#
+# In Render: New + → "Blueprint" → connect the betpal-dashboard repo → it reads
+# this file. You'll be prompted to paste BACKEND_ORIGIN (your live backend URL).
+#
+# The frontend proxies /api/dashboard/* to BACKEND_ORIGIN (see next.config.js),
+# so the browser only ever talks to this service's own domain — no CORS needed.
+
+services:
+  - type: web
+    name: betpal-dashboard
+    runtime: node
+    plan: starter
+    region: singapore            # match the backend's region for a fast proxy hop
+    buildCommand: npm install && npm run build
+    startCommand: npm run start   # binds to $PORT (Render sets it)
+    healthCheckPath: /login       # static page → returns 200
+    envVars:
+      - key: BACKEND_ORIGIN
+        sync: false               # e.g. https://betpal-backend.onrender.com
+      - key: NODE_VERSION
+        value: "20"
