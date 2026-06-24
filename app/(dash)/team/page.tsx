@@ -12,7 +12,8 @@ export default function TeamPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [inviting, setInviting] = useState<{ email: string; role: string } | null>(null);
-  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [inviteResult, setInviteResult] = useState<{ email: string; inviteUrl: string; emailed: boolean; emailError: string | null } | null>(null);
+  const [sending, setSending] = useState(false);
   const [pwModal, setPwModal] = useState(false);
   const [pw, setPw] = useState({ current: '', next: '' });
   const { toast, toastNode } = useToast();
@@ -26,10 +27,13 @@ export default function TeamPage() {
 
   async function sendInvite() {
     if (!inviting?.email.trim()) return;
+    setSending(true);
     try {
-      const r = await apiPost<{ inviteUrl: string }>('/team/invite', inviting);
-      setInviteUrl(r.inviteUrl); setInviting(null); load();
+      const r = await apiPost<{ inviteUrl: string; emailed: boolean; emailError: string | null }>('/team/invite', inviting);
+      setInviteResult({ email: inviting.email.trim(), inviteUrl: r.inviteUrl, emailed: r.emailed, emailError: r.emailError });
+      setInviting(null); load();
     } catch (e: any) { toast(e.message); }
+    finally { setSending(false); }
   }
   async function changeRole(m: User, role: string) {
     await apiPatch(`/team/${m.id}/role`, { role }); load();
@@ -100,15 +104,26 @@ export default function TeamPage() {
               <option value="contributor">Contributor — can add & edit content</option>
               <option value="admin">Admin — can also manage team & metrics</option>
             </select></div>
-          <button className="btn btn-primary" onClick={sendInvite}>Create invite link</button>
+          <button className="btn btn-primary" onClick={sendInvite} disabled={sending}>{sending ? <span className="spinner" /> : 'Send invite'}</button>
         </Modal>
       )}
 
-      {inviteUrl && (
-        <Modal title="Invite link ready" onClose={() => setInviteUrl(null)}>
-          <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>Share this link with your teammate. It expires in 7 days. (Email delivery isn't wired up yet — copy it for now.)</p>
-          <div className="field"><input className="input" readOnly value={inviteUrl} onFocus={(e) => e.target.select()} /></div>
-          <button className="btn btn-primary" onClick={() => { navigator.clipboard?.writeText(inviteUrl); toast('Copied'); }}>Copy link</button>
+      {inviteResult && (
+        <Modal title={inviteResult.emailed ? 'Invite sent' : 'Invite link ready'} onClose={() => setInviteResult(null)}>
+          {inviteResult.emailed ? (
+            <p style={{ marginTop: 0, fontSize: 14 }}>
+              <span style={{ color: 'var(--accent)', fontWeight: 700 }}>✓ Emailed to {inviteResult.email}</span>
+              <br /><span className="muted" style={{ fontSize: 13 }}>They'll get a branded invite with a link to join (expires in 7 days). You can also copy the link below.</span>
+            </p>
+          ) : (
+            <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+              {inviteResult.emailError === 'email_not_configured'
+                ? 'Email isn’t set up yet, so copy this link and send it to your teammate. It expires in 7 days.'
+                : 'Couldn’t send the email — copy this link and send it to your teammate instead. It expires in 7 days.'}
+            </p>
+          )}
+          <div className="field"><input className="input" readOnly value={inviteResult.inviteUrl} onFocus={(e) => e.target.select()} /></div>
+          <button className="btn btn-primary" onClick={() => { navigator.clipboard?.writeText(inviteResult.inviteUrl); toast('Copied'); }}>Copy link</button>
         </Modal>
       )}
 

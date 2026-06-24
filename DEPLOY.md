@@ -104,13 +104,34 @@ That's it — the product is live.
 2. **Team → Change my password** (set your own; rotate off the seed password).
 3. **Team → Invite teammate** → enter their email + role
    (**admin** = can manage team/metrics, **contributor** = everything else) →
-   **Create invite link** → copy it → send it to them (Slack/email/etc).
+   **Send invite**. If email is configured (below), it's emailed automatically;
+   either way you get a copyable link as a fallback.
 4. They open the link, pick a name + password, and they're in — ready to work in
    the backlog, marketing, social posts, and ideas board.
 
-> Invite delivery is copy/paste links for now (no email sender wired). That's
-> enough to onboard the team today; wiring Resend/Postmark to auto-email invites
-> is a small follow-up if you want it.
+---
+
+## Part E — (optional) One-click email invites via Resend
+
+Without this, invites still work — they just produce a copyable link you send
+yourself. To have invites **emailed automatically**:
+
+1. Create a free account at **https://resend.com** (3,000 emails/month free).
+2. **Verify a sending domain** (Resend → Domains → Add). Use a domain you own,
+   e.g. `betpal.app` — add the DNS records they show you. *(Resend's test address
+   `onboarding@resend.dev` only delivers to your own account email, so a verified
+   domain is required to email teammates.)*
+3. Create an **API key** (Resend → API Keys).
+4. In Render → `betpal-backend` → **Environment**, add:
+
+   | Key | Value |
+   |---|---|
+   | `RESEND_API_KEY` | the key from step 3 |
+   | `INVITE_FROM_EMAIL` | `BetPal <team@betpal.app>` (a verified sender on your domain) |
+
+   Save → redeploy. Now **Team → Invite teammate** emails a branded invite; the
+   confirmation shows "✓ Emailed to …". If sending ever fails, the dashboard falls
+   back to the copy link automatically.
 
 ---
 
