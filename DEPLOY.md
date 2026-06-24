@@ -135,6 +135,32 @@ yourself. To have invites **emailed automatically**:
 
 ---
 
+## Part F — (optional) Log Calendar auto-capture of app/Claude commits
+
+The **Log Calendar** already records everything done inside the dashboard. To
+also log **every commit** to `betmate` / `betpal-backend` (including Claude Code's
+commits) automatically:
+
+1. On the backend, set an **`INGEST_TOKEN`** env var (Render → betpal-backend →
+   Environment) — any long random string. This secures the ingest endpoint.
+2. Point the hook config at your backend — edit `~/.betpal-log.env`:
+   ```
+   BETPAL_LOG_URL=https://betpal-backend.onrender.com
+   BETPAL_LOG_TOKEN=<the INGEST_TOKEN you just set>
+   ```
+3. Install the git hook into both repos (one command, reversible — it just copies
+   one `post-commit` file per repo; delete it to uninstall):
+   ```bash
+   sh ~/Documents/betpal-dashboard/scripts/install-log-hooks.sh
+   ```
+
+From then on, every commit posts its subject to the dashboard and shows up on the
+Log Calendar that day — tagged **Claude** if the commit is co-authored by Claude,
+otherwise **App change**. The hook runs in the background and never blocks or
+fails a commit.
+
+---
+
 ## Notes
 
 - **Costs**: each Render web service on the `starter` plan is paid; the backend

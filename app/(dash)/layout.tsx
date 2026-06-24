@@ -11,6 +11,7 @@ const NAV = [
   { href: '/backlog', label: 'Backlog', ico: '☑' },
   { href: '/marketing', label: 'Marketing', ico: '📣' },
   { href: '/social', label: 'Social Posts', ico: '🎨' },
+  { href: '/log', label: 'Log Calendar', ico: '🗓' },
   { href: '/changelog', label: 'Activity', ico: '⟳' },
   { href: '/ideas', label: 'Ideas', ico: '💡' },
   { href: '/ai', label: 'AI Queue', ico: '✦', badgeKey: 'pendingDrafts' },

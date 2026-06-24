@@ -1,0 +1,23 @@
+#!/bin/sh
+# BetPal Mission Control — log this commit onto the dashboard Log Calendar.
+# Installed into a repo's .git/hooks/post-commit by scripts/install-log-hooks.sh.
+# Reads BETPAL_LOG_URL / BETPAL_LOG_TOKEN from ~/.betpal-log.env (or the env).
+# Never blocks or fails a commit (runs in the background, always exits 0).
+
+[ -f "$HOME/.betpal-log.env" ] && . "$HOME/.betpal-log.env"
+URL="${BETPAL_LOG_URL:-http://localhost:4000}"
+TOKEN="${BETPAL_LOG_TOKEN:-betpal-local-ingest-token-dev}"
+
+REPO="$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")"
+esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+SUBJECT="$(esc "$(git log -1 --pretty=%s)")"
+AUTHOR="$(esc "$(git log -1 --pretty=%an)")"
+# Commits co-authored by Claude are logged as "claude", otherwise "app".
+if git log -1 --pretty=%B | grep -qi "claude"; then SRC="claude"; else SRC="app"; fi
+
+curl -s -m 5 -X POST "$URL/api/dashboard/ingest/event" \
+  -H "Content-Type: application/json" \
+  -H "x-ingest-token: $TOKEN" \
+  -d "{\"source\":\"$SRC\",\"repo\":\"$REPO\",\"title\":\"$SUBJECT\",\"detail\":\"by $AUTHOR\"}" \
+  >/dev/null 2>&1 &
+exit 0
