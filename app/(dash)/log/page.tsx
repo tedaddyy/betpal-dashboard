@@ -8,6 +8,7 @@ import type { ActivityEntry } from '@/lib/types';
 const CAT: Record<string, { label: string; icon: string; color: string }> = {
   app: { label: 'App change', icon: '🛠', color: '#0F8FE0' },
   claude: { label: 'Claude', icon: '✦', color: '#7A5AF8' },
+  deploy: { label: 'Deploy', icon: '⬆', color: '#00B36F' },
   idea: { label: 'Idea', icon: '💡', color: '#B5790A' },
   todo: { label: 'Backlog', icon: '☑', color: '#0B8A5B' },
   marketing: { label: 'Marketing', icon: '📣', color: '#E1306C' },

@@ -161,6 +161,31 @@ fails a commit.
 
 ---
 
+## Part G — (optional) One-click "Push live" button
+
+Lets admins redeploy production from inside the dashboard (sidebar → **⬆ Push
+live**) instead of using the Render UI. It triggers **Render Deploy Hooks**.
+
+1. Render → **betpal-dashboard → Settings → Deploy Hook** → copy the URL.
+   (Optionally do the same for **betpal-backend**.)
+2. Render → **betpal-backend → Environment**, add → **Save**:
+
+   | Key | Value |
+   |---|---|
+   | `RENDER_DEPLOY_HOOK_DASHBOARD` | the dashboard service's deploy hook URL |
+   | `RENDER_DEPLOY_HOOK_BACKEND` | (optional) the backend service's deploy hook URL |
+
+The hook URLs stay secret on the backend — the browser only ever calls an
+authenticated endpoint, never the hooks directly. The button deploys the latest
+code **already pushed to GitHub** (commit + push first), takes ~1–2 min, and logs
+a "Deploy" entry on the Log Calendar. Owner + admins only.
+
+> Note: with Render **auto-deploy on**, pushing to `main` already deploys. This
+> button is for redeploying on demand (e.g. after changing env vars, or if you
+> turn auto-deploy off to control timing).
+
+---
+
 ## Notes
 
 - **Costs**: each Render web service on the `starter` plan is paid; the backend

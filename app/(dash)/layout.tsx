@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
 import { initials } from '@/lib/ui';
+import DeployButton from '@/lib/DeployButton';
 
 const NAV = [
   { href: '/overview', label: 'Overview', ico: '◎' },
@@ -61,6 +62,7 @@ export default function DashLayout({ children }: { children: React.ReactNode }) 
           })}
         </nav>
         <div className="sidebar-footer">
+          <div style={{ marginBottom: 10 }}><DeployButton /></div>
           <div className="user-chip">
             <div className="avatar" style={{ background: user.avatarColor }}>{initials(user.name, user.email)}</div>
             <div className="user-meta">
